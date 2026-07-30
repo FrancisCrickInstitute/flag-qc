@@ -27,7 +27,10 @@ Its goal is to provide an accessible, practical toolkit for basic quality contro
 **Authors:**  
 - Dave Barry (david.barry@crick.ac.uk) 
 - Sara Salgueiro Torres (sara.salgueirotorres@crick.ac.uk)
-- Alicja Skórkowska (alicja.skorkowska@crick.ac.uk)  
+- Lotanna Amazu (lotanna.amazu@crick.ac.uk)
+- Stefania Marcotti (stefania.marcotti@crick.ac.uk)
+- Cameron Shand (cameron.shand@crick.ac.uk)
+- Alicja Skórkowska (alicja.skorkowska@uj.edu.pl)  
 
 **Feedback & Contributions:**  
 We welcome your suggestions, feedback, and pull requests!  
