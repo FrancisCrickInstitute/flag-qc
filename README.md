@@ -25,14 +25,17 @@ This notebook was developed as part of the **py-bioimage-qc** project at the Cri
 Its goal is to provide an accessible, practical toolkit for basic quality control of bioimaging data.
 
 **Authors:**  
-- Dave Barry (david.barry@crick.ac.uk) 
-- Sara Salgueiro Torres (sara.salgueirotorres@crick.ac.uk)
-- Lotanna Amazu (lotanna.amazu@crick.ac.uk)
-- Stefania Marcotti (stefania.marcotti@crick.ac.uk)
-- Cameron Shand (cameron.shand@crick.ac.uk)
-- Alicja Skórkowska (alicja.skorkowska@uj.edu.pl)  
+- [Dave Barry](https://www.crick.ac.uk/research/find-a-researcher/david-barry)* (david.barry@crick.ac.uk) 
+- [Sara Salgueiro Torres](https://www.crick.ac.uk/research/find-a-researcher/sara-salgueiro-torres)* (sara.salgueirotorres@crick.ac.uk)
+- [Lotanna Amazu](https://www.crick.ac.uk/research/find-a-researcher/lotanna-amazu)
+- [Stefania Marcotti](https://www.crick.ac.uk/research/find-a-researcher/stefania-marcotti)
+- [Cameron Shand](https://www.crick.ac.uk/research/find-a-researcher/cameron-shand)
+- [Alicja Skórkowska](https://portalwiedzy.cm-uj.krakow.pl/info/author/UJCM22b401960ddf4ee59b30ec6d96d36316?r=publication&ps=20&title=Profil%2Bosoby%2B%25E2%2580%2593%2BAlicja%2BSk%25C3%25B3rkowska%2B%25E2%2580%2593%2BUniwersytet%2BJagiello%25C5%2584ski%2B%25E2%2580%2593%2BCollegium%2BMedicum&lang=pl)
 
-**Feedback & Contributions:**  
+*Authors for correspondence
+
+
+## Feedback & Contributions: 
 We welcome your suggestions, feedback, and pull requests!  
 For questions or to report issues, please open an issue [here](https://github.com/FrancisCrickInstitute/py-bioimage-qc/issues) or contact the authors directly.
 
