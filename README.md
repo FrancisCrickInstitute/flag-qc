@@ -1,6 +1,6 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/FrancisCrickInstitute/py-bioimage-qc/main?urlpath=%2Fdoc%2Ftree%2Fimage_qc_prototype_notebook.ipynb) [![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/release/python-3130/) ![Commit activity](https://img.shields.io/github/commit-activity/y/FrancisCrickInstitute/py-bioimage-qc?style=plastic) ![GitHub](https://img.shields.io/github/license/FrancisCrickInstitute/py-bioimage-qc?color=green&style=plastic)
 
-# BioQCPy
+# FlagQC
 
 ## Overview
 
@@ -27,7 +27,6 @@ Its goal is to provide an accessible, practical toolkit for basic quality contro
 **Authors:**  
 - [Dave Barry](https://www.crick.ac.uk/research/find-a-researcher/david-barry)* (david.barry@crick.ac.uk) 
 - [Sara Salgueiro Torres](https://www.crick.ac.uk/research/find-a-researcher/sara-salgueiro-torres)* (sara.salgueirotorres@crick.ac.uk)
-- [Lotanna Amazu](https://www.crick.ac.uk/research/find-a-researcher/lotanna-amazu)
 - [Stefania Marcotti](https://www.crick.ac.uk/research/find-a-researcher/stefania-marcotti)
 - [Cameron Shand](https://www.crick.ac.uk/research/find-a-researcher/cameron-shand)
 - [Alicja Skórkowska](https://portalwiedzy.cm-uj.krakow.pl/info/author/UJCM22b401960ddf4ee59b30ec6d96d36316?r=publication&ps=20&title=Profil%2Bosoby%2B%25E2%2580%2593%2BAlicja%2BSk%25C3%25B3rkowska%2B%25E2%2580%2593%2BUniwersytet%2BJagiello%25C5%2584ski%2B%25E2%2580%2593%2BCollegium%2BMedicum&lang=pl)
