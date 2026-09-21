@@ -49,6 +49,37 @@ python image_qc_prototype.py
 
 Verify code with the Python version noted in the README badge (Python 3.13).
 
+## Model dependency (crosstalk)
+
+The crosstalk weights are **not in this repo**. The model is trained and
+produced by a separate repository,
+[`FrancisCrickInstitute/CrosstalkPy`](https://github.com/FrancisCrickInstitute/CrosstalkPy),
+which is currently being refactored to align its model format with
+[`djpbarry/KimmelNET`](https://github.com/djpbarry/KimmelNET).
+
+Current state and direction:
+
+- Today the notebook's `estimate_crosstalk` hardcodes a specific class
+  (`CrossTalkRegressionModel(initial_filters=128, num_conv_blocks=6)`) and
+  `load_state_dict`s a `.pth` path that does not exist
+  (`./crosstalk_model/crosstalk_regression_model_trained_2025-12-15_18-22-01_256_0.0005.pth`).
+  This is fragile: it couples FlagQC to CrosstalkPy's internal class name and
+  constructor args, and will break if the refactor changes them.
+- The intended fix is to load the **TorchScript `.pt` bundle** (architecture
+  plus weights in one artifact) via `torch.jit.load(...)`, instead of
+  `load_state_dict` on a re-constructed class. This decouples FlagQC from the
+  model's internals.
+- The exact `.pt` filename, release location, and I/O contract are not yet
+  finalised because the refactor is in progress. The current input contract is
+  `[batch, 2, 256, 256]` (channel 0 = "mixed", channel 1 = "source"), output
+  a scalar alpha in `[0, 1]`; verify this has not changed before wiring up the
+  new loader.
+
+Do **not** hand-write the model class or its constructor args here; obtain the
+trained artifact from CrosstalkPy and load it as a bundle. The decision on
+whether to vendor the artifact into this repo or fetch it at runtime is still
+open.
+
 ## Requirements / dependencies
 
 From `requirements.txt`: `bioio`, `bioio-ome-tiff`, `numpy`, `scipy`, `jupyter`,
