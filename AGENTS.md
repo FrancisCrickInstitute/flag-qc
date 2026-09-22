@@ -21,8 +21,9 @@ renamed to FlagQC in commit `ed02115`).
   canonical implementation; it is the file the Binder badge in the README launches.
 - `image_qc_prototype.py` — an older standalone script version of the same QC
   functions. **Not kept in sync** with the notebook (see "Gotchas").
-- `regression_model.py` — the `CrossTalkRegressionModel` PyTorch module
-  (imported by the notebook).
+- `regression_model.py` — a local copy of the `CrossTalkRegressionModel`
+  PyTorch module. **No longer imported by the notebook** (see "Model
+  dependency"); kept for reference only.
 - `read_images_with_bioio.ipynb` — a minimal example notebook demonstrating
   `bioio` image loading.
 - `inputs/` — example `.ome.tiff` microscopy data, tracked with Git LFS.
@@ -51,34 +52,30 @@ Verify code with the Python version noted in the README badge (Python 3.13).
 
 ## Model dependency (crosstalk)
 
-The crosstalk weights are **not in this repo**. The model is trained and
-produced by a separate repository,
-[`FrancisCrickInstitute/CrosstalkPy`](https://github.com/FrancisCrickInstitute/CrosstalkPy),
-which is currently being refactored to align its model format with
-[`djpbarry/KimmelNET`](https://github.com/djpbarry/KimmelNET).
+The crosstalk model is trained and produced by a separate repository,
+[`FrancisCrickInstitute/CrosstalkPy`](https://github.com/FrancisCrickInstitute/CrosstalkPy).
+It is **not vendored** into this repo; FlagQC loads it from CrosstalkPy's
+release `v1.0.0` at runtime.
 
-Current state and direction:
+- The notebook's `estimate_crosstalk` now loads the **TorchScript `.pt` bundle**
+  (architecture plus weights in one artifact) via `torch.jit.load(...)`,
+  decoupling FlagQC from CrosstalkPy's internal class names and constructor
+  args.
+- The artifact is
+  `crosstalk_regression_model_v1.0.0_2026-09-22_14-42-47_128_0.0005.pt`
+  (~51 MB), fetched from the release URL and cached next to the notebook on
+  first use. `load_crosstalk_model` verifies its SHA256 checksum
+  (`5f29b254b3ead78101d3f896fc69ecfae205d5695ded0a9558341c2a1e4ef8fb`) after
+  download and fails loudly on mismatch.
+- I/O contract: input `[batch, 2, 256, 256]` float tensor (channel 0 = "mixed",
+  channel 1 = "source", min-max normalized), output `[batch, 1]` scalar alpha
+  in `[0, 1]`. Batch size is dynamic. The model architecture is the
+  single-branch `AdvancedRegressionModel` (`initial_filters=128`,
+  `num_conv_blocks=6`).
 
-- Today the notebook's `estimate_crosstalk` hardcodes a specific class
-  (`CrossTalkRegressionModel(initial_filters=128, num_conv_blocks=6)`) and
-  `load_state_dict`s a `.pth` path that does not exist
-  (`./crosstalk_model/crosstalk_regression_model_trained_2025-12-15_18-22-01_256_0.0005.pth`).
-  This is fragile: it couples FlagQC to CrosstalkPy's internal class name and
-  constructor args, and will break if the refactor changes them.
-- The intended fix is to load the **TorchScript `.pt` bundle** (architecture
-  plus weights in one artifact) via `torch.jit.load(...)`, instead of
-  `load_state_dict` on a re-constructed class. This decouples FlagQC from the
-  model's internals.
-- The exact `.pt` filename, release location, and I/O contract are not yet
-  finalised because the refactor is in progress. The current input contract is
-  `[batch, 2, 256, 256]` (channel 0 = "mixed", channel 1 = "source"), output
-  a scalar alpha in `[0, 1]`; verify this has not changed before wiring up the
-  new loader.
-
-Do **not** hand-write the model class or its constructor args here; obtain the
-trained artifact from CrosstalkPy and load it as a bundle. The decision on
-whether to vendor the artifact into this repo or fetch it at runtime is still
-open.
+If the release or contract changes (filename, URL, checksum, or I/O shape),
+update `CROSSTALK_MODEL_URL`, `CROSSTALK_MODEL_FILENAME`, and
+`CROSSTALK_MODEL_SHA256` in the notebook's `estimate_crosstalk` cell to match.
 
 ## Requirements / dependencies
 
@@ -110,10 +107,12 @@ Standard per-channel QC pipeline (in the notebook and script):
 5. Crosstalk estimation (notebook only) — pairwise per channel via the PyTorch
    regression model.
 
-The crosstalk model (`CrossTalkRegressionModel` in `regression_model.py`) is a
-convolutional network that takes two normalized 256×256 inputs stacked into a
-`(1, 2, 256, 256)` tensor and outputs a scalar crosstalk fraction. Inputs are
-normalized to `[0,1]` and resized to 256×256 in `crosstalk_test_transforms_fn`.
+The crosstalk model (loaded as a TorchScript `.pt` bundle from CrosstalkPy, see
+"Model dependency") is a convolutional network that takes two normalized 256×256
+inputs stacked into a `(1, 2, 256, 256)` tensor and outputs a scalar crosstalk
+fraction. Inputs are normalized to `[0,1]` and resized to 256×256 in
+`crosstalk_test_transforms_fn`. The local `regression_model.py` copy is no
+longer used at runtime.
 
 ## Conventions and style
 
@@ -134,10 +133,10 @@ normalized to `[0,1]` and resized to 256×256 in `crosstalk_test_transforms_fn`.
   `image_qc_prototype.py` (uses `(max-min)/dtype_max`) and
   `read_images_with_bioio.ipynb` (uses `max/min`). Treat the notebook as
   canonical; do not assume the `.py` file matches it.
-- **Missing model weights.** `estimate_crosstalk` in the notebook loads a
-  `.pth` file from `./crosstalk_model/`, but that directory is absent from the
-  repo. The crosstalk step will fail at runtime until a trained weights file is
-  provided.
+- **Model weights are fetched at runtime.** `estimate_crosstalk` downloads the
+  `.pt` bundle from CrosstalkPy's release on first use and caches it locally.
+  The first run requires network access; the cached file also needs Git LFS if
+  you want to commit it (it is not tracked by default).
 - **Hardcoded input paths.** Both the script (`./inputs/Experiment-09.ome.tiff`)
   and the notebook (`./inputs/Experiment-09-test.ome.tiff`) reference specific
   files under `inputs/`.
