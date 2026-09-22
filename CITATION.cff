@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "FlagQC"
+abstract: >-
+  A quality-control toolkit for microscopy images that flags issues such as
+  saturation, crosstalk, bit-depth problems, background non-uniformity, and odd
+  histogram distributions.
+keywords:
+  - microscopy
+  - bioimaging
+  - quality control
+  - crosstalk
+type: software
+repository-code: "https://github.com/FrancisCrickInstitute/py-bioimage-qc"
+authors:
+  - family-names: Barry
+    given-names: Dave
+    email: david.barry@crick.ac.uk
+    affiliation: Francis Crick Institute
+    orcid: ""
+  - family-names: Salgueiro Torres
+    given-names: Sara
+    email: sara.salgueirotorres@crick.ac.uk
+    affiliation: Francis Crick Institute
+    orcid: ""
+  - family-names: Marcotti
+    given-names: Stefania
+    affiliation: Francis Crick Institute
+    orcid: ""
+  - family-names: Shand
+    given-names: Cameron
+    affiliation: Francis Crick Institute
+    orcid: ""
+  - family-names: Skórkowska
+    given-names: Alicja
+    affiliation: Uniwersytet Jagielloński - Collegium Medicum
+    orcid: ""
