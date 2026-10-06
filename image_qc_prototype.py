@@ -1,14 +1,14 @@
 import bioio_bioformats
 import numpy as np
 from bioio import BioImage
-
 from scipy.optimize import curve_fit
+from skimage.transform import resize
 
-import numpy as np
+from regression_model import *
+from regression_model import CrossTalkRegressionModel
 
 
 def detect_odd_histogram_distribution(image, bins=256, percentile_threshold=99.99):
-
     # Calculate the histogram of the image
     hist, bin_edges = np.histogram(image, bins=bins, range=(np.min(image), np.max(image)))
 
@@ -22,7 +22,7 @@ def detect_odd_histogram_distribution(image, bins=256, percentile_threshold=99.9
     # Find the indices of the first non-zero bin
     non_zero_bins = np.where(hist > 0)[0]
     if len(non_zero_bins) == 0:
-        # If no non-zero bins are found, return zero for all metrics
+        # If no non-zero bins are found return zero for all metrics
         return 0, 0
 
     first_non_zero_bin = non_zero_bins[0]
@@ -44,47 +44,44 @@ def flat_plane(coords, p0, p1, p2):
     return p0 * x + p1 * y + p2
 
 
-def estimate_background_flat_plane_deviation(image_3d):
+def estimate_background_flat_plane_deviation(image_3d, foreground_percentile=90):
     depth, height, width = image_3d.shape
-
-    # Initialize array to store background estimates for each slice
+    
+    # Initialise array to store background estimates for each slice
     background_3d = np.zeros_like(image_3d, dtype=np.float64)
-
     deviations = []
 
     for z in range(depth):
-        print(f'Checking slice {z} of {depth}')
         # Process each 2D slice independently
-        image = image_3d[z, :, :]
+        image = image_3d[z, :, :].astype(np.float64)
 
         # Generate grid of coordinates
         y = np.arange(height)
         x = np.arange(width)
         xx, yy = np.meshgrid(x, y)
 
-        # Flatten arrays
-        x_flat = xx.ravel()
-        y_flat = yy.ravel()
-        image_flat = image.ravel()
+        # Only fit to the dimmer pixels — excludes bright objects from skewing the plane
+        cutoff = np.percentile(image, foreground_percentile)
+        mask = image <= cutoff
 
         # Fit a flat plane to the current slice
         p_initial = np.zeros(3)
-        params, _ = curve_fit(flat_plane, (x_flat, y_flat), image_flat, p0=p_initial)
+        params, _ = curve_fit(flat_plane, (xx[mask], yy[mask]), image[mask], p0=p_initial)
 
         # Calculate fitted background for the current slice
         background_slice = flat_plane((xx, yy), *params).reshape(image.shape)
-
         # Store the fitted background slice in the 3D array
         background_3d[z, :, :] = background_slice
 
-        # Calculate deviation from the flat plane
-        deviation = np.abs(image - background_slice)
+        # Only measure deviation from the flat planeon the same background pixels used for the fit
+        deviation = np.abs(image[mask] - background_slice[mask])
         deviations.append(np.std(deviation))
 
-    # The non-uniformity metric could be an average or max deviation across slices
-    non_uniformity = np.mean(deviations)  # or max(deviations)
-
-    return background_3d, non_uniformity
+    # Calculate the overall non-uniformity metric as the mean of deviations across all slices
+    non_uniformity = np.mean(deviations)
+    non_uniformity_pct = non_uniformity / np.mean(background_3d) * 100  
+    
+    return background_3d, non_uniformity, non_uniformity_pct
 
 
 def check_bit_depth(image):
@@ -99,20 +96,20 @@ def check_bit_depth(image):
     return bit_depth
 
 
-def calculate_dynamic_range(image):
-    min_intensity = np.min(image)
-    max_intensity = np.max(image)
+def calculate_dynamic_range(image, low_percentile=0.1, high_percentile=99.9):
+    min_intensity = np.percentile(image, low_percentile)
+    max_intensity = np.percentile(image, high_percentile)
 
     # Determine the maximum possible range based on the image's data type
     dtype_max = np.iinfo(image.dtype).max
 
-    # Normalized dynamic range
-    dynamic_range = (max_intensity - min_intensity) / dtype_max
-    return dynamic_range
+    # Normalised dynamic range
+    dynamic_range_percentage = round((max_intensity - min_intensity) * 100 / dtype_max, 2)
+    return dynamic_range_percentage
 
 
 def calculate_saturation_percentage(image):
-    # Determine the minimum and maximum possible values based on the image's data type
+    # Determine the minimum and maximum possible values based on the image's data type 
     dtype_min = np.iinfo(image.dtype).min
     dtype_max = np.iinfo(image.dtype).max
 
@@ -123,7 +120,7 @@ def calculate_saturation_percentage(image):
     total_pixels = image.size
 
     # Calculate the percentage of saturated pixels
-    saturation_percentage = (saturated_pixels / total_pixels) * 100
+    saturation_percentage = round(saturated_pixels / total_pixels * 100, 2)
 
     return saturation_percentage
 
@@ -135,11 +132,12 @@ for c in range(img.dims.C):
     channel = channel[0, :, :]
     check_bit_depth(channel)
     dr = calculate_dynamic_range(channel)
-    print(f'Dynamic range of Channel {c} is {dr}')
+    print(f'Dynamic range of Channel {c} is {dr}%')
     saturation_percentage = calculate_saturation_percentage(channel)
     print(f'Relative saturation of Channel {c} is {saturation_percentage}%')
-    # background_3d, non_uniformity = estimate_background_flat_plane_deviation(channel)
-    # print(f"Non-uniformity (Flat Plane Deviation) for Channel {c} is {non_uniformity}")
+    background_3d, non_uniformity, non_uniformity_pct = estimate_background_flat_plane_deviation(channel)
+    print(f"Non-uniformity (Flat Plane Deviation) for Channel {c} is {non_uniformity: .2f} ({non_uniformity_pct:.2f}%)")
     zero_bins, zero_bin_ratio = detect_odd_histogram_distribution(channel)
     print(f"Number of zero bins: {zero_bins}")
     print(f"Ratio of zero bins: {zero_bin_ratio:.4f}")
+
