@@ -34,6 +34,14 @@ jupyter lab image_qc_prototype_notebook.ipynb
 The crosstalk check downloads a ~51 MB trained model on first use and caches it
 locally, so network access is required the first time that check is run.
 
+## Related Work
+
+- [PixelPatrol](https://github.com/ida-mdc/pixel-patrol) is a plugin-based tool
+  for dataset-level image QC and exploration, with an interactive browser report.
+  It overlaps with FlagQC on saturation/clipping and intensity histograms, and
+  adds focus metrics. It does not currently estimate channel crosstalk, assess
+  bit depth or compute dynamic range.
+
 ## Acknowledgements & Contact
 
 This notebook was developed as part of the **FlagQC** project at the Crick Advanced Light Microscopy (_CALM_) department in the Francis Crick Institute.  

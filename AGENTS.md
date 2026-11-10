@@ -50,6 +50,26 @@ python image_qc_prototype.py
 
 Verify code with the Python version noted in the README badge (Python 3.13).
 
+## Related projects
+
+[PixelPatrol](https://github.com/ida-mdc/pixel-patrol) (`ida-mdc`, MIT,
+Python ≥3.12) has similar aims. It is a packaged, plugin-based tool for
+dataset-scale QC: custom loaders, processors and viewer widgets; BioIO among its
+loaders; `.parquet` output and an interactive or static-HTML report. The source
+reviewed on 2026-11-10 (`raster_processor.py`, `raster_image_processor.py`,
+`raster_image_numpy_metrics.py`) computes:
+
+- min, max, mean and std intensity, plus NaN fraction
+- intensity histograms, for display only (nothing is flagged)
+- `dark_clipping_fraction` and `bright_clipping_fraction`, which equal FlagQC's
+  saturation check (integer dtypes only)
+- focus metrics: `laplacian_variance` and `spectral_slope`
+
+It has **no** crosstalk, bit-depth, dynamic-range or background-flatness
+metric, and no cross-channel metric of any kind. These, especially crosstalk,
+are what set FlagQC apart. Its processor-plugin interface is a possible future
+route for shipping FlagQC checks; this has not been pursued yet.
+
 ## Model dependency (crosstalk)
 
 The crosstalk model is trained and produced by a separate repository,
